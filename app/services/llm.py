@@ -140,7 +140,8 @@ def _generate_response(prompt: str) -> str:
                     raise ValueError(
                         f"{llm_provider}: model_name is not set, please set it in the config.toml file."
                     )
-                if not base_url:
+                # Gemini doesn't require base_url (has default), so skip this check for it
+                if not base_url and llm_provider not in ["gemini"]:
                     raise ValueError(
                         f"{llm_provider}: base_url is not set, please set it in the config.toml file."
                     )

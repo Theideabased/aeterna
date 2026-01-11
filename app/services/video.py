@@ -194,7 +194,8 @@ def combine_videos(
                     clip = CompositeVideoClip([background, clip_resized])
                     
             shuffle_side = random.choice(["left", "right", "top", "bottom"])
-            if video_transition_mode.value == VideoTransitionMode.none.value:
+            # Apply video transitions if specified
+            if video_transition_mode is None or video_transition_mode.value == VideoTransitionMode.none.value:
                 clip = clip
             elif video_transition_mode.value == VideoTransitionMode.fade_in.value:
                 clip = video_effects.fadein_transition(clip, 1)
@@ -401,12 +402,17 @@ def generate_video(
         interline = int(params.font_size * 0.25)
         size=(int(max_width), int(txt_height + params.font_size * 0.25 + (interline * (wrapped_txt.count("\n") + 1))))
 
+        # Handle transparent background - PIL doesn't support 'transparent' string
+        bg_color = params.text_background_color
+        if bg_color and bg_color.lower() in ['transparent', 'none']:
+            bg_color = None  # None means transparent in MoviePy
+
         _clip = TextClip(
             text=wrapped_txt,
             font=font_path,
             font_size=params.font_size,
             color=params.text_fore_color,
-            bg_color=params.text_background_color,
+            bg_color=bg_color,
             stroke_color=params.stroke_color,
             stroke_width=params.stroke_width,
             # interline=interline,

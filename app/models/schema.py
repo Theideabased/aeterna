@@ -85,7 +85,7 @@ class VideoParams(BaseModel):
     custom_audio_file: Optional[str] = None  # Custom audio file path, will ignore video_script and disable subtitle
     video_language: Optional[str] = "en-US"  # auto detect
 
-    voice_name: Optional[str] = "gemini:Zephyr-Female"
+    voice_name: Optional[str] = "en-US-AriaNeural"
     voice_volume: Optional[float] = 1.0
     voice_rate: Optional[float] = 1.0
     bgm_type: Optional[str] = "random"
