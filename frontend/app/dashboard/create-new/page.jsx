@@ -23,13 +23,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8
 
 function CreateNew() {
 
-  const [formData,setFormData]= useState({
+  const [formData, setFormData] = useState({
     video_subject: '',
     video_aspect: '9:16',
     voice_name: 'en-US-AriaNeural',
     video_source: 'pixabay',
     duration: '30 Seconds',
-    imageStyle: 'Realistic'
+    imageStyle: 'Use Videos Online'
   });
   const [loading,setLoading]=useState(false);
   const [videoScript,setVideoScript]=useState();
@@ -64,9 +64,9 @@ function CreateNew() {
       return;
     }
     
-    // Check if style is realistic
-    if (formData.imageStyle && formData.imageStyle !== 'Realistic') {
-      toast.error('Only Realistic style is available now. Other styles coming soon!');
+    // Check if style is Use Videos Online (currently available)
+    if (formData.imageStyle && formData.imageStyle !== 'Use Videos Online') {
+      toast.error('Only "Use Videos Online" style is available now. Other styles coming soon!');
       return;
     }
     
@@ -119,7 +119,13 @@ function CreateNew() {
 
       console.log('API Response:', response.data);
 
-      const taskId = response.data.task_id;
+      // Extract task_id from the response (API returns {status, data: {task_id, ...}})
+      const taskId = response.data.data?.task_id || response.data.task_id;
+      
+      if (!taskId) {
+        throw new Error('No task ID received from API');
+      }
+      
       toast('Video generation started! Task ID: ' + taskId);
 
       // Poll for task completion
@@ -148,10 +154,11 @@ function CreateNew() {
           `${API_BASE_URL}/api/v1/tasks/${taskId}`
         );
 
-        const result = statusResponse.data;
-        const taskStatus = result.state;
+        // API returns {status, data: {state, videos, ...}}
+        const responseData = statusResponse.data.data || statusResponse.data;
+        const taskStatus = responseData.state;
 
-        console.log('Task status:', taskStatus);
+        console.log('Task status:', taskStatus, 'Full response:', responseData);
 
         if (taskStatus === 'complete') {
           clearInterval(pollInterval);
@@ -161,7 +168,7 @@ function CreateNew() {
           const savedVideo = {
             id: videoId,
             taskId: taskId,
-            videos: result.videos || [],
+            videos: responseData.videos || [],
             createdAt: new Date().toISOString(),
             subject: formData.topic || formData.video_subject
           };
@@ -180,9 +187,9 @@ function CreateNew() {
           
           toast.success('Video generated successfully!');
           
-        } else if (taskStatus === 'error') {
+        } else if (taskStatus === 'error' || taskStatus === 'failed') {
           clearInterval(pollInterval);
-          const errorMsg = result.message || 'Unknown error';
+          const errorMsg = responseData.message || responseData.error || 'Unknown error';
           toast.error('Video generation failed: ' + errorMsg);
           setLoading(false);
         } else {

@@ -239,12 +239,38 @@ After launching, the browser will open automatically
 
 #### ④ Launch the API Service 🚀
 
+##### Option A: Using the startup script
+
 ```shell
-python main.py
+cd api
+./start_api.sh
+```
+
+##### Option B: Using uvicorn directly (Recommended for deployment)
+
+```shell
+cd api
+# Make sure virtual environment is activated
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Development mode with auto-reload
+uvicorn app.asgi:app --host 127.0.0.1 --port 8080 --reload
+
+# Production mode
+uvicorn app.asgi:app --host 0.0.0.0 --port 8080 --workers 4
+```
+
+##### Option C: Using Python directly (Legacy)
+
+```shell
+cd api
+python3 main.py
 ```
 
 After launching, you can view the `API documentation` at http://127.0.0.1:8080/docs and directly test the interface
 online for a quick experience.
+
+> **📝 Note:** For deployment, it's recommended to use `uvicorn` directly or with a process manager like `systemd` or `PM2`. See [SETUP.md](./SETUP.md) for more details.
 
 ## Voice Synthesis 🗣
 

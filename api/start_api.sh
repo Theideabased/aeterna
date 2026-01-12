@@ -4,12 +4,18 @@
 echo "🚀 Starting Aeterna API Server..."
 echo ""
 
-# Navigate to project directory
-cd /home/user/Documents/aeterna
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
 
-# Activate virtual environment
-echo "📦 Activating virtual environment..."
-source .venv/bin/activate
+# Check if virtual environment exists
+if [ -d ".venv" ]; then
+    echo "📦 Activating virtual environment..."
+    source .venv/bin/activate
+else
+    echo "⚠️  Virtual environment not found. Please run: python3 -m venv .venv"
+    echo "⚠️  Then install dependencies: pip install -r requirements.txt"
+fi
 
 # Check if config.toml exists
 if [ ! -f "config.toml" ]; then
@@ -32,4 +38,5 @@ echo "Press Ctrl+C to stop the server"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-python main.py
+# Use uvicorn directly for simpler deployment
+uvicorn app.asgi:app --host 127.0.0.1 --port 8080 --reload

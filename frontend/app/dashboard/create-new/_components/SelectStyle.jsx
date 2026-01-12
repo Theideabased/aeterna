@@ -6,37 +6,37 @@ function SelectStyle({onUserSelect}) {
 
     const styleOptions = [
         {
-            name:"Realistic",
-            image:'/realistic.png',
+            name:"Use Videos Online",
+            image:'/online_video.jpg',
             available: true
         },
         {
-            name:"Cartoon",
+            name:"Realistic AI",
+            image:'/realistic.png',
+            available: false
+        },
+        {
+            name:"Cartoon AI",
             image:'/cartoon.png',
             available: false
         },
         {
-            name:"Comic",
-            image:'/comic.png',
-            available: false
-        },
-        {
-            name:"Watercolor",
+            name:"Watercolor AI",
             image:'/watercolor.png',
             available: false
         },
         {
-            name:"CyberPunk",
+            name:"CyberPunk AI",
             image:'/cyberpunk.png',
             available: false
         },
     ]
 
-    const [selectedStyle, setSelectedStyle] = useState('Realistic')
+    const [selectedStyle, setSelectedStyle] = useState('Use Videos Online')
     
-    // Set default to Realistic on mount
+    // Set default to Use Videos Online on mount
     React.useEffect(() => {
-        onUserSelect('imageStyle', 'Realistic')
+        onUserSelect('imageStyle', 'Use Videos Online')
     }, [])
 
   return (
