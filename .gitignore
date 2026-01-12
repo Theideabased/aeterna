@@ -38,6 +38,11 @@ api/.env.*
 *.env
 *.env.*
 
+# BUT allow example files
+!.env.example
+!*.env.example
+!api/.env.example
+
 # Streamlit
 **/.streamlit/
 streamlit.log
