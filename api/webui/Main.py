@@ -2,6 +2,9 @@ import os
 import platform
 import sys
 from uuid import uuid4
+import requests
+import json
+import time
 
 import streamlit as st
 from loguru import logger
@@ -23,8 +26,10 @@ from app.models.schema import (
     VideoTransitionMode,
 )
 from app.services import llm, voice
-from app.services import task as tm
 from app.utils import utils
+
+# API Configuration
+API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8080")
 
 st.set_page_config(
     page_title="Aeterna",
@@ -67,14 +72,34 @@ if "video_terms" not in st.session_state:
 if "ui_language" not in st.session_state:
     st.session_state["ui_language"] = config.ui.get("language", system_locale)
 
+
+def check_api_health():
+    """Check if the API server is running"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/ping", timeout=5)
+        return response.status_code == 200
+    except Exception:
+        return False
+
+
 # 加载语言文件
 locales = utils.load_locales(i18n_dir)
 
-# 创建一个顶部栏，包含标题和语言选择
-title_col, lang_col = st.columns([3, 1])
+# Check API health
+api_healthy = check_api_health()
+
+# 创建一个顶部栏，包含标题、API状态和语言选择
+title_col, status_col, lang_col = st.columns([3, 1, 1])
 
 with title_col:
     st.title(f"Aeterna v{config.project_version}")
+
+with status_col:
+    if api_healthy:
+        st.success("✅ API Connected")
+    else:
+        st.error("❌ API Offline")
+        st.caption(f"Check: {API_BASE_URL}")
 
 with lang_col:
     display_languages = []
@@ -208,8 +233,19 @@ if not config.app.get("hide_config", False):
         middle_config_panel = config_panels[1]
         right_config_panel = config_panels[2]
 
-        # 左侧面板 - 日志设置
+        # 左侧面板 - 日志和API设置
         with left_config_panel:
+            st.write("**API Settings**")
+            # API Base URL
+            api_base_url = st.text_input(
+                "API Base URL",
+                value=config.app.get("api_base_url", API_BASE_URL),
+                help="The base URL of your Aeterna API server"
+            )
+            config.app["api_base_url"] = api_base_url
+            API_BASE_URL = api_base_url
+            
+            st.write("**Log Settings**")
             # 是否隐藏配置面板
             hide_config = st.checkbox(
                 tr("Hide Basic Settings"), value=config.app.get("hide_config", False)
@@ -1043,7 +1079,63 @@ if start_button:
     logger.info(utils.to_json(params))
     scroll_to_bottom()
 
-    result = tm.start(task_id=task_id, params=params)
+    # Call API instead of direct service
+    try:
+        # Convert params to dict for API request
+        params_dict = params.model_dump() if hasattr(params, 'model_dump') else params.dict()
+        
+        # Make API request
+        response = requests.post(
+            f"{API_BASE_URL}/api/v1/videos",
+            json=params_dict,
+            timeout=300  # 5 minutes timeout
+        )
+        response.raise_for_status()
+        
+        task_response = response.json()
+        task_id_from_api = task_response.get("task_id", task_id)
+        
+        # Poll for task completion
+        max_retries = 600  # 10 minutes with 1 second intervals
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            status_response = requests.get(
+                f"{API_BASE_URL}/api/v1/tasks/{task_id_from_api}",
+                timeout=30
+            )
+            status_response.raise_for_status()
+            
+            result = status_response.json()
+            task_status = result.get("state", "")
+            
+            if task_status == "complete":
+                logger.info(tr("Video Generation Completed"))
+                break
+            elif task_status == "error":
+                error_msg = result.get("message", "Unknown error")
+                logger.error(f"Task failed: {error_msg}")
+                st.error(tr("Video Generation Failed"))
+                st.stop()
+            else:
+                # Still processing
+                logger.info(f"Task status: {task_status}")
+                time.sleep(1)
+                retry_count += 1
+        
+        if retry_count >= max_retries:
+            st.error("Task timeout - please check task status manually")
+            st.stop()
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API request failed: {str(e)}")
+        st.error(f"API Error: {str(e)}")
+        st.stop()
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        st.error(f"Error: {str(e)}")
+        st.stop()
+
     if not result or "videos" not in result:
         st.error(tr("Video Generation Failed"))
         logger.error(tr("Video Generation Failed"))
@@ -1060,7 +1152,7 @@ if start_button:
     except Exception:
         pass
 
-    open_task_folder(task_id)
+    open_task_folder(task_id_from_api)
     logger.info(tr("Video Generation Completed"))
     scroll_to_bottom()
 

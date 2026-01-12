@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Union
 import pydantic
 from pydantic import BaseModel
 
-# 忽略 Pydantic 的特定警告
+# Pydantic
 warnings.filterwarnings(
     "ignore",
     category=UserWarning,
@@ -57,10 +57,10 @@ class VideoParams(BaseModel):
     """
     {
       "video_subject": "",
-      "video_aspect": "横屏 16:9（西瓜视频）",
-      "voice_name": "女生-晓晓",
+      "video_aspect": "16:9",
+      "voice_name": "",
       "bgm_name": "random",
-      "font_name": "STHeitiMedium 黑体-中",
+      "font_name": "STHeitiMedium",
       "text_color": "#FFFFFF",
       "font_size": 60,
       "stroke_color": "#000000",
@@ -141,13 +141,13 @@ class AudioRequest(BaseModel):
 class VideoScriptParams:
     """
     {
-      "video_subject": "春天的花海",
+      "video_subject": "",
       "video_language": "",
       "paragraph_number": 1
     }
     """
 
-    video_subject: Optional[str] = "春天的花海"
+    video_subject: Optional[str] = ""
     video_language: Optional[str] = ""
     paragraph_number: Optional[int] = 1
 
@@ -161,9 +161,9 @@ class VideoTermsParams:
     }
     """
 
-    video_subject: Optional[str] = "春天的花海"
+    video_subject: Optional[str] = ""
     video_script: Optional[str] = (
-        "春天的花海，如诗如画般展现在眼前。万物复苏的季节里，大地披上了一袭绚丽多彩的盛装。金黄的迎春、粉嫩的樱花、洁白的梨花、艳丽的郁金香……"
+        ""
     )
     amount: Optional[int] = 5
 

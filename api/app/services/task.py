@@ -61,6 +61,7 @@ def generate_terms(task_id, params, video_script):
 def save_script_data(task_id, video_script, video_terms, params):
     script_file = path.join(utils.task_dir(task_id), "script.json")
     script_data = {
+        "title": params.video_subject,
         "script": video_script,
         "search_terms": video_terms,
         "params": params,

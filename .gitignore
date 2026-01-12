@@ -1,0 +1,112 @@
+# ============================================
+# SYSTEM FILES
+# ============================================
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ============================================
+# BACKEND (API) - Python/FastAPI
+# ============================================
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Backend config and storage
+/api/config.toml
+/api/storage/
+/api/logs/
+
+# Backend environment
+/api/.env
+/api/.env.*
+
+# Streamlit
+**/.streamlit/
+streamlit.log
+
+# AI Models (if any)
+/api/models/
+/models/
+
+# Debug and test files
+CLAUDE.md
+debug/
+debug_*.py
+test_*.py
+
+# ============================================
+# FRONTEND - Next.js/React
+# ============================================
+
+# Dependencies
+/frontend/node_modules/
+/frontend/.pnp
+/frontend/.pnp.*
+/frontend/.yarn/*
+!/frontend/.yarn/patches
+!/frontend/.yarn/plugins
+!/frontend/.yarn/releases
+!/frontend/.yarn/versions
+
+# Next.js build output
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+
+# Production
+/frontend/dist/
+
+# Testing
+/frontend/coverage/
+/frontend/.nyc_output/
+
+# Frontend environment
+/frontend/.env
+/frontend/.env.*
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# Debug logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/pnpm-debug.log*
+
+# Vercel
+/frontend/.vercel
+
+# TypeScript
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+
+# Turbopack
+/frontend/.turbo
+
+# ============================================
+# VUEPRESS (if exists)
+# ============================================
+/sites/docs/.vuepress/.temp
+/sites/docs/.vuepress/.cache
+/sites/docs/.vuepress/dist
+
+# ============================================
+# MISC
+# ============================================
+*.pem
+*.log

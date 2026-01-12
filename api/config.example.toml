@@ -17,9 +17,9 @@ pixabay_api_keys = []
 
 # (Supported providers):
 #   openai
-#   moonshot    (月之暗面)
+#   moonshot   
 #   azure
-#   qwen        (通义千问)
+#   qwen        
 #   deepseek
 #   gemini
 #   ollama

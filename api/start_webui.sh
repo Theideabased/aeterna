@@ -5,7 +5,7 @@ echo "🌐 Starting Aeterna Web UI..."
 echo ""
 
 # Navigate to project directory
-cd /home/user/Documents/aeterna
+cd /home/user/Documents/aeterna/api
 
 # Activate virtual environment
 echo "📦 Activating virtual environment..."
