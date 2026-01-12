@@ -30,9 +30,13 @@ __pycache__/
 /api/storage/
 /api/logs/
 
-# Backend environment
-/api/.env
-/api/.env.*
+# Backend environment (CRITICAL - Never commit!)
+api/.env
+api/.env.*
+.env
+.env.*
+*.env
+*.env.*
 
 # Streamlit
 **/.streamlit/
@@ -74,13 +78,13 @@ test_*.py
 /frontend/coverage/
 /frontend/.nyc_output/
 
-# Frontend environment
-/frontend/.env
-/frontend/.env.*
-/frontend/.env.local
-/frontend/.env.development.local
-/frontend/.env.test.local
-/frontend/.env.production.local
+# Frontend environment (CRITICAL - Never commit!)
+frontend/.env
+frontend/.env.*
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
 # Debug logs
 /frontend/npm-debug.log*
@@ -107,6 +111,40 @@ test_*.py
 
 # ============================================
 # MISC
+# ============================================
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Sensitive data (IMPORTANT!)
+config.toml
+**/storage/
+**/logs/
+**/.secrets/
+credentials.json
+secrets.json
+*-secrets.*
+
+# Large files that shouldn't be in git
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.mp3
+*.wav
+*.flac
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 # ============================================
 *.pem
 *.log
