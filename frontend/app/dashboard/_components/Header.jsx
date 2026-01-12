@@ -10,7 +10,7 @@ function Header() {
   return (
     <div className='p-3 px-5 flex items-center justify-between shadow' >
         <div className='flex gap-3 items-center'>
-            <Image src={"/logo.png"} width={80} height={80} alt="logo" />
+            <Image src={"/aeterna ai logo.png"} width={80} height={80} alt="logo" />
             <h2 className='font-bold text-xl' >Aeterna AI</h2>  
       </div>
 
