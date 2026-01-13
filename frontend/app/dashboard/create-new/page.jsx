@@ -12,9 +12,9 @@ import axios from 'axios'
 import CustomLoading from './_components/Loading'
 import {v4 as uuidv4} from 'uuid'
 import { VideoDataContext } from '@/app/_context/VideoDataContext'
-import PlayerDialog from '../_components/PlayerDialog'
 import { UserDetailContext } from '@/app/_context/UserDetailContext'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const outfit = Outfit({subsets: ["latin-ext"],weight: "600"});
 
@@ -22,6 +22,7 @@ const outfit = Outfit({subsets: ["latin-ext"],weight: "600"});
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8080";
 
 function CreateNew() {
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     video_subject: '',
@@ -40,6 +41,7 @@ function CreateNew() {
   const [playVideo,setPlayVideo]=useState();
   const [videoid,setVideoid]=useState();
   const {userDetail,setUserDetail}=useContext(UserDetailContext);
+  const [generatingTaskId, setGeneratingTaskId] = useState(null);
 
 
 
@@ -126,10 +128,41 @@ function CreateNew() {
         throw new Error('No task ID received from API');
       }
       
-      toast('Video generation started! Task ID: ' + taskId);
-
-      // Poll for task completion
-      await pollTaskStatus(taskId);
+      // Save task ID for user reference
+      setGeneratingTaskId(taskId);
+      
+      // Store task info in localStorage
+      const taskInfo = {
+        taskId: taskId,
+        subject: formData.topic || formData.video_subject,
+        createdAt: new Date().toISOString(),
+        status: 'processing'
+      };
+      
+      const existingTasks = JSON.parse(localStorage.getItem('generatingTasks') || '[]');
+      existingTasks.push(taskInfo);
+      localStorage.setItem('generatingTasks', JSON.stringify(existingTasks));
+      
+      // Update credits immediately
+      UpdateUserCredits();
+      
+      setLoading(false);
+      
+      // Show success message with task ID
+      toast.success(
+        `Video generation started! Task ID: ${taskId.substring(0, 8)}...`,
+        { duration: 5000 }
+      );
+      
+      toast.info(
+        'Your video is being generated in the background. This usually takes 2-5 minutes. Check the "Videos" page to see your completed videos.',
+        { duration: 8000 }
+      );
+      
+      // Redirect to videos page after 3 seconds
+      setTimeout(() => {
+        router.push('/dashboard/videos');
+      }, 3000);
 
     } catch (error) {
       console.error('Error generating video:', error);
@@ -142,72 +175,6 @@ function CreateNew() {
     // Convert "30 Seconds" -> 30
     const match = durationText?.match(/(\d+)/);
     return match ? parseInt(match[1]) : 30;
-  };
-
-  const pollTaskStatus = async (taskId) => {
-    const maxRetries = 120; // 10 minutes with 5 second intervals
-    let retryCount = 0;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const statusResponse = await axios.get(
-          `${API_BASE_URL}/api/v1/tasks/${taskId}`
-        );
-
-        // API returns {status, data: {state, videos, ...}}
-        const responseData = statusResponse.data.data || statusResponse.data;
-        const taskStatus = responseData.state;
-
-        console.log('Task status:', taskStatus, 'Full response:', responseData);
-
-        if (taskStatus === 'complete') {
-          clearInterval(pollInterval);
-          
-          // Save video data
-          const videoId = uuidv4();
-          const savedVideo = {
-            id: videoId,
-            taskId: taskId,
-            videos: responseData.videos || [],
-            createdAt: new Date().toISOString(),
-            subject: formData.topic || formData.video_subject
-          };
-
-          // Store in localStorage
-          const existingVideos = JSON.parse(localStorage.getItem('videos') || '[]');
-          existingVideos.push(savedVideo);
-          localStorage.setItem('videos', JSON.stringify(existingVideos));
-
-          // Update credits
-          UpdateUserCredits();
-          
-          setVideoid(videoId);
-          setPlayVideo(true);
-          setLoading(false);
-          
-          toast.success('Video generated successfully!');
-          
-        } else if (taskStatus === 'error' || taskStatus === 'failed') {
-          clearInterval(pollInterval);
-          const errorMsg = responseData.message || responseData.error || 'Unknown error';
-          toast.error('Video generation failed: ' + errorMsg);
-          setLoading(false);
-        } else {
-          // Still processing
-          toast('Processing... Status: ' + taskStatus);
-        }
-
-        retryCount++;
-        if (retryCount >= maxRetries) {
-          clearInterval(pollInterval);
-          toast.error('Task timeout - please check status later');
-          setLoading(false);
-        }
-        
-      } catch (error) {
-        console.error('Error polling task status:', error);
-      }
-    }, 5000); // Poll every 5 seconds
   };
 
   const UpdateUserCredits=async()=>{
@@ -252,7 +219,6 @@ function CreateNew() {
       </div>
 
       <CustomLoading loading={loading}/>
-      <PlayerDialog playVideo={playVideo} videoid={videoid}/>
     </div>
   )
 }

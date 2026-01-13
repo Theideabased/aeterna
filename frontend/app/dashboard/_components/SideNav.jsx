@@ -1,6 +1,6 @@
 "use client"
 
-import { CircleUser, FileVideo, PanelsTopLeft, ShieldPlus, Zap } from 'lucide-react'
+import { CircleUser, FileVideo, PanelsTopLeft, ShieldPlus, Video, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
@@ -22,18 +22,24 @@ function SideNav() {
        } ,
        {
         id:3,
+        name:'My Videos',
+        path:'/dashboard/videos',
+        icon:Video
+       } ,
+       {
+        id:4,
         name:'Automation',
         path:'/dashboard/automation',
         icon:Zap
        } ,
        {
-        id:4,
+        id:5,
         name:'Sponsor Us',
         path:'/dashboard/sponsor',
         icon:ShieldPlus
        } ,
        {
-        id:5,
+        id:6,
         name:'Account',
         path:'/',
         icon:CircleUser

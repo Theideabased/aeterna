@@ -402,9 +402,14 @@ def generate_video(
         interline = int(params.font_size * 0.25)
         size=(int(max_width), int(txt_height + params.font_size * 0.25 + (interline * (wrapped_txt.count("\n") + 1))))
 
-        # Handle transparent background - PIL doesn't support 'transparent' string
+        # Handle background color - can be bool, string, or None
         bg_color = params.text_background_color
-        if bg_color and bg_color.lower() in ['transparent', 'none']:
+        
+        # If it's a boolean
+        if isinstance(bg_color, bool):
+            bg_color = 'black' if bg_color else None
+        # If it's a string, check for transparent
+        elif isinstance(bg_color, str) and bg_color.lower() in ['transparent', 'none']:
             bg_color = None  # None means transparent in MoviePy
 
         _clip = TextClip(

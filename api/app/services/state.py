@@ -1,4 +1,8 @@
 import ast
+import os
+import json
+import glob
+from datetime import datetime
 from abc import ABC, abstractmethod
 
 from app.config import config
@@ -24,11 +28,86 @@ class BaseState(ABC):
 class MemoryState(BaseState):
     def __init__(self):
         self._tasks = {}
+        self._restore_tasks_from_disk()
+    
+    def _restore_tasks_from_disk(self):
+        """Restore task state from disk on startup"""
+        try:
+            from app.utils import utils
+            tasks_dir = utils.task_dir()
+            if not os.path.exists(tasks_dir):
+                return
+            
+            # Scan all task directories
+            for task_id in os.listdir(tasks_dir):
+                task_path = os.path.join(tasks_dir, task_id)
+                if not os.path.isdir(task_path):
+                    continue
+                
+                # Check if task has completed files
+                final_videos = glob.glob(os.path.join(task_path, "final-*.mp4"))
+                combined_videos = glob.glob(os.path.join(task_path, "combined-*.mp4"))
+                script_file = os.path.join(task_path, "script.json")
+                audio_file = os.path.join(task_path, "audio.mp3")
+                subtitle_file = os.path.join(task_path, "subtitle.srt")
+                
+                if final_videos:
+                    # Task completed - restore its state
+                    task_data = {
+                        "task_id": task_id,
+                        "state": const.TASK_STATE_COMPLETE,
+                        "progress": 100,
+                        "videos": final_videos,
+                        "combined_videos": combined_videos,
+                    }
+                    
+                    # Try to get timestamp from file modification time
+                    try:
+                        created_at = os.path.getmtime(final_videos[0])
+                        task_data["created_at"] = datetime.fromtimestamp(created_at).isoformat()
+                    except:
+                        task_data["created_at"] = datetime.now().isoformat()
+                    
+                    # Load script if available
+                    if os.path.exists(script_file):
+                        try:
+                            with open(script_file, 'r', encoding='utf-8') as f:
+                                script_data = json.load(f)
+                                task_data["script"] = script_data.get("script", "")
+                                task_data["terms"] = script_data.get("terms", [])
+                        except:
+                            pass
+                    
+                    if os.path.exists(audio_file):
+                        task_data["audio_file"] = audio_file
+                    
+                    if os.path.exists(subtitle_file):
+                        task_data["subtitle_path"] = subtitle_file
+                    
+                    self._tasks[task_id] = task_data
+        except Exception as e:
+            # Don't fail startup if restoration fails
+            print(f"Warning: Failed to restore tasks from disk: {e}")
 
     def get_all_tasks(self, page: int, page_size: int):
         start = (page - 1) * page_size
         end = start + page_size
         tasks = list(self._tasks.values())
+        
+        # Sort: Processing videos first, then by timestamp (newest first)
+        def sort_key(task):
+            # If task is processing (state != 1), put it first (use 0)
+            # If task is complete (state == 1), use timestamp (invert for newest first)
+            is_complete = task.get('state', 0) == const.TASK_STATE_COMPLETE
+            timestamp = task.get('created_at', '1970-01-01T00:00:00')
+            
+            # Return tuple: (is_complete, -timestamp)
+            # False sorts before True, so processing comes first
+            # Negative timestamp comparison for reverse chronological order
+            return (is_complete, timestamp)
+        
+        tasks.sort(key=sort_key, reverse=True)
+        
         total = len(tasks)
         return tasks[start:end], total
 
@@ -43,6 +122,10 @@ class MemoryState(BaseState):
         if progress > 100:
             progress = 100
 
+        # Add timestamp if this is a new task
+        if task_id not in self._tasks:
+            kwargs["created_at"] = datetime.now().isoformat()
+        
         self._tasks[task_id] = {
             "task_id": task_id,
             "state": state,

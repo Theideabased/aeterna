@@ -29,10 +29,19 @@ function PlayerDialog({playVideo,videoid}) {
     },[playVideo])
 
     const GetVideoData = async ()=>{
-        const result = await db.select().from(VideoData)
-        .where(eq(VideoData.id,videoid));
-        setVideoData(result[0]);
-
+        // Get video from localStorage instead of database
+        const videos = JSON.parse(localStorage.getItem('videos') || '[]');
+        const video = videos.find(v => v.id === videoid);
+        
+        if (video && video.videos && video.videos.length > 0) {
+            // Use the video URL directly
+            setVideoData({
+                videoUrl: video.videos[0], // First video URL from API
+                taskId: video.taskId,
+                subject: video.subject,
+                createdAt: video.createdAt
+            });
+        }
     }
   return (
     <Dialog open={openDialog}>
@@ -40,24 +49,28 @@ function PlayerDialog({playVideo,videoid}) {
   <DialogContent className="bg-white flex flex-col items-center">
 
       <DialogTitle className="text-3xl font-bold my-5">Your Video is Generated</DialogTitle>
-      <Player
-        component={RemotionVideo}
-        durationInFrames={Number(durationinFrames.toFixed(0))}
-        compositionWidth={450}
-        compositionHeight={650}
-        fps={30}
-        controls={true}
-        inputProps={{
-            ...videoData,
-            setDurationinFrames:(frameValue)=>setDurationinFrames(frameValue)
-        }}
-    />
+      
+      {videoData?.videoUrl ? (
+        <video 
+          src={videoData.videoUrl} 
+          controls 
+          className="w-full max-w-md rounded-lg"
+          style={{maxHeight: '500px'}}
+        >
+          Your browser does not support the video tag.
+        </video>
+      ) : (
+        <div className="w-full max-w-md h-64 flex items-center justify-center bg-gray-100 rounded-lg">
+          <p>Loading video...</p>
+        </div>
+      )}
+      
     <div className='flex gap-10 mt-7'>
         <Button variant="ghost" onClick={()=>{router.replace('/dashboard');setOpenDialog(false)}}>
             Cancel
         </Button>
-        <Button>
-            Export
+        <Button onClick={()=>videoData?.videoUrl && window.open(videoData.videoUrl, '_blank')}>
+            Download Video
         </Button>
     </div>
   </DialogContent>

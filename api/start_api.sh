@@ -29,6 +29,9 @@ if [ -f ".env" ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
+# Set CORS to allow frontend on localhost:3000
+export CORS_ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
+
 # Start the API server
 echo "✨ Starting API server on http://127.0.0.1:8080"
 echo "📖 API Documentation: http://127.0.0.1:8080/docs"

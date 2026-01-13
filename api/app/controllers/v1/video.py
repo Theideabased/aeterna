@@ -103,6 +103,26 @@ def get_all_tasks(request: Request, page: int = Query(1, ge=1), page_size: int =
     request_id = base.get_task_id(request)
     tasks, total = sm.state.get_all_tasks(page, page_size)
 
+    # Convert file paths to HTTP URLs for all tasks
+    endpoint = config.app.get("endpoint", "")
+    task_dir = utils.task_dir()
+    
+    def file_to_uri(file: str):
+        v = file.replace("\\", "/")
+        if not file.startswith(endpoint):
+            _uri_path = v.replace(task_dir, "tasks").replace("\\", "/")
+            _uri_path = f"{endpoint}/{_uri_path}"
+        else:
+            _uri_path = file
+        return _uri_path
+    
+    # Process each task to convert file paths to URLs
+    for task in tasks:
+        if "videos" in task and task["videos"]:
+            task["videos"] = [file_to_uri(v) for v in task["videos"]]
+        if "combined_videos" in task and task["combined_videos"]:
+            task["combined_videos"] = [file_to_uri(v) for v in task["combined_videos"]]
+
     response = {
         "tasks": tasks,
         "total": total,
@@ -126,7 +146,7 @@ def get_task(
         endpoint = str(request.base_url)
     endpoint = endpoint.rstrip("/")
 
-    request_id = base.get_task_id(request)
+    # Use task_id from path parameter, not random UUID from headers
     task = sm.state.get_task(task_id)
     if task:
         task_dir = utils.task_dir()
@@ -154,7 +174,7 @@ def get_task(
         return utils.get_response(200, task)
 
     raise HttpException(
-        task_id=task_id, status_code=404, message=f"{request_id}: task not found"
+        task_id=task_id, status_code=404, message=f"{task_id}: task not found"
     )
 
 
