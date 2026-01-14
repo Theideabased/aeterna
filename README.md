@@ -151,7 +151,6 @@ NEXT_PUBLIC_OPENAI_API_KEY=your_openai_key
 HUGGINGFACE_API_KEY=your_huggingface_key
 
 
-> ⚠️ **Important**: Never commit `.env.local` to version control. Only `.env.production` should be committed for deployment configuration.
 
 ### 4. Set Up Database
 
@@ -181,7 +180,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000)
 
 1. Push your code to GitHub
 2. Import project in Vercel
-3. Add environment variables from `.env.production`
+3. Add environment variables
 4. Deploy!
 
 
