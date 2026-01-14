@@ -9,110 +9,60 @@
 *~
 
 # ============================================
-# BACKEND (API) - Python/FastAPI
-# ============================================
-
-# Python virtual environments
-venv/
-.venv/
-env/
-ENV/
-
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-
-# Backend config and storage
-/api/config.toml
-/api/storage/
-/api/logs/
-
-# Backend environment (CRITICAL - Never commit!)
-api/.env
-api/.env.*
-.env
-.env.*
-*.env
-*.env.*
-
-# BUT allow example files
-!.env.example
-!*.env.example
-!api/.env.example
-
-# Streamlit
-**/.streamlit/
-streamlit.log
-
-# AI Models (if any)
-/api/models/
-/models/
-
-# Debug and test files
-CLAUDE.md
-debug/
-debug_*.py
-test_*.py
-
-# ============================================
-# FRONTEND - Next.js/React
+# FRONTEND - Next.js/React (ROOT DIRECTORY)
 # ============================================
 
 # Dependencies
-/frontend/node_modules/
-/frontend/.pnp
-/frontend/.pnp.*
-/frontend/.yarn/*
-!/frontend/.yarn/patches
-!/frontend/.yarn/plugins
-!/frontend/.yarn/releases
-!/frontend/.yarn/versions
+node_modules/
+node_modules
+
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # Next.js build output
-/frontend/.next/
-/frontend/out/
-/frontend/build/
+.next/
+out/
+build/
 
 # Production
-/frontend/dist/
+dist/
 
 # Testing
-/frontend/coverage/
-/frontend/.nyc_output/
+coverage/
+.nyc_output/
 
-# Frontend environment (CRITICAL - Never commit!)
-frontend/.env
-frontend/.env.*
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
+# Environment variables (CRITICAL - Never commit!)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# BUT allow example and production files to be tracked
+!.env.example
+!.env.production
 
 # Debug logs
-/frontend/npm-debug.log*
-/frontend/yarn-debug.log*
-/frontend/yarn-error.log*
-/frontend/pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Vercel
-/frontend/.vercel
+.vercel
 
 # TypeScript
-/frontend/*.tsbuildinfo
-/frontend/next-env.d.ts
+*.tsbuildinfo
+next-env.d.ts
 
 # Turbopack
-/frontend/.turbo
-
-# ============================================
-# VUEPRESS (if exists)
-# ============================================
-/sites/docs/.vuepress/.temp
-/sites/docs/.vuepress/.cache
-/sites/docs/.vuepress/dist
+.turbo
 
 # ============================================
 # MISC
