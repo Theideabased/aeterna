@@ -40,13 +40,13 @@ coverage/
 .env
 .env.*
 .env.local
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
 
 # BUT allow example and production files to be tracked
 !.env.example
-!.env.production
 
 # Debug logs
 npm-debug.log*
