@@ -2,13 +2,15 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, XCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8080'
 
 function VideosPage() {
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [cancellingTasks, setCancellingTasks] = useState(new Set())
 
   useEffect(() => {
     fetchAllVideos()
@@ -52,6 +54,31 @@ function VideosPage() {
     } catch (error) {
       console.error('Error fetching videos:', error)
       setLoading(false)
+    }
+  }
+
+  const cancelVideoGeneration = async (taskId) => {
+    if (cancellingTasks.has(taskId)) return
+    
+    try {
+      setCancellingTasks(prev => new Set(prev).add(taskId))
+      
+      // Call the API to cancel the task
+      await axios.delete(`${API_BASE_URL}/api/v1/tasks/${taskId}`)
+      
+      toast.success('Video generation cancelled successfully')
+      
+      // Refresh the video list
+      fetchAllVideos()
+    } catch (error) {
+      console.error('Error cancelling video:', error)
+      toast.error('Failed to cancel video generation: ' + (error.response?.data?.message || error.message))
+    } finally {
+      setCancellingTasks(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(taskId)
+        return newSet
+      })
     }
   }
 
@@ -133,6 +160,26 @@ function VideosPage() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Cancel Button */}
+                    <Button 
+                      onClick={() => cancelVideoGeneration(video.task_id)}
+                      disabled={cancellingTasks.has(video.task_id)}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      {cancellingTasks.has(video.task_id) ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Cancelling...
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Cancel Generation
+                        </>
+                      )}
+                    </Button>
                     
                     <div className="text-xs text-gray-500 mt-4 space-y-1">
                       <p className="truncate">Task ID: {video.task_id}</p>

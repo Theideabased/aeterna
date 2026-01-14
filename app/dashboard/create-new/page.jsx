@@ -15,6 +15,7 @@ import { VideoDataContext } from '@/app/_context/VideoDataContext'
 import { UserDetailContext } from '@/app/_context/UserDetailContext'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { XCircle } from 'lucide-react'
 
 const outfit = Outfit({subsets: ["latin-ext"],weight: "600"});
 
@@ -42,6 +43,7 @@ function CreateNew() {
   const [videoid,setVideoid]=useState();
   const {userDetail,setUserDetail}=useContext(UserDetailContext);
   const [generatingTaskId, setGeneratingTaskId] = useState(null);
+  const [cancelToken, setCancelToken] = useState(null);
 
 
 
@@ -77,6 +79,10 @@ function CreateNew() {
 
   const GenerateVideoWithAPI = async () => {
     setLoading(true);
+    
+    // Create cancel token
+    const source = axios.CancelToken.source();
+    setCancelToken(source);
     
     try {
       // Prepare the API payload
@@ -115,7 +121,8 @@ function CreateNew() {
           headers: {
             'Content-Type': 'application/json'
           },
-          timeout: 300000 // 5 minutes timeout
+          timeout: 300000, // 5 minutes timeout
+          cancelToken: source.token
         }
       );
 
@@ -147,6 +154,7 @@ function CreateNew() {
       UpdateUserCredits();
       
       setLoading(false);
+      setCancelToken(null);
       
       // Show success message with task ID
       toast.success(
@@ -165,9 +173,24 @@ function CreateNew() {
       }, 3000);
 
     } catch (error) {
-      console.error('Error generating video:', error);
-      toast.error('Failed to generate video: ' + (error.response?.data?.message || error.message));
+      if (axios.isCancel(error)) {
+        console.log('Request cancelled by user');
+        toast.info('Video generation cancelled');
+      } else {
+        console.error('Error generating video:', error);
+        toast.error('Failed to generate video: ' + (error.response?.data?.message || error.message));
+      }
       setLoading(false);
+      setCancelToken(null);
+    }
+  };
+
+  const cancelGeneration = () => {
+    if (cancelToken) {
+      cancelToken.cancel('Generation cancelled by user');
+      setLoading(false);
+      setCancelToken(null);
+      toast.info('Stopping video generation...');
     }
   };
 
@@ -218,7 +241,7 @@ function CreateNew() {
 
       </div>
 
-      <CustomLoading loading={loading}/>
+      <CustomLoading loading={loading} onCancel={cancelGeneration}/>
     </div>
   )
 }
