@@ -11,12 +11,21 @@ import {
   Rocket,
   Users,
   Code,
-  Zap
+  Zap,
+  Mail
 } from 'lucide-react'
 
 const outfit = Outfit({subsets: ["latin-ext"], weight: ["400", "600", "700"]});
 
 function SponsorUs() {
+  const handleSponsor = () => {
+    window.location.href = 'mailto:sogunmusire@gmail.com?subject=Sponsorship - Aeterna Project&body=Hi Seyi, I would like to sponsor your Aeterna project.'
+  }
+
+  const handleBuyMeCoffee = () => {
+    window.location.href = 'mailto:sogunmusire@gmail.com?subject=Buy Me a Coffee - Aeterna&body=Hi Seyi, I would like to buy you a coffee to support your work on Aeterna!'
+  }
+
   const features = [
     {
       icon: Rocket,
@@ -62,7 +71,7 @@ function SponsorUs() {
         <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
           <Button 
             className='bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2'
-            onClick={() => window.open('https://buymeacoffee.com/yourusername', '_blank')}
+            onClick={handleBuyMeCoffee}
           >
             <Coffee className='h-6 w-6' />
             Buy Me a Coffee
@@ -115,9 +124,10 @@ function SponsorUs() {
               Every bit helps us keep improving! ☕
             </p>
             <Button 
-              className='w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold'
-              onClick={() => window.open('https://buymeacoffee.com/yourusername', '_blank')}
+              className='w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold flex items-center justify-center gap-2'
+              onClick={handleBuyMeCoffee}
             >
+              <Mail className='h-5 w-5' />
               Sponsor Once
             </Button>
           </div>
@@ -134,13 +144,28 @@ function SponsorUs() {
               Get your name in our README and priority support! ⭐
             </p>
             <Button 
-              className='w-full bg-white text-purple-600 hover:bg-gray-100 font-bold'
-              onClick={() => window.open('https://buymeacoffee.com/yourusername', '_blank')}
+              className='w-full bg-white text-purple-600 hover:bg-gray-100 font-bold flex items-center justify-center gap-2'
+              onClick={handleSponsor}
             >
+              <Mail className='h-5 w-5' />
               Sponsor Monthly
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Contact Section */}
+      <div className='bg-blue-50 border-2 border-blue-200 rounded-xl p-6 text-center mb-12'>
+        <h4 className='font-semibold text-blue-900 mb-2'>Questions about sponsorship?</h4>
+        <p className='text-blue-800 text-sm mb-4'>
+          Feel free to reach out with any questions or custom sponsorship proposals
+        </p>
+        <a 
+          href="mailto:sogunmusire@gmail.com?subject=Question about Aeterna Sponsorship"
+          className='text-blue-600 hover:text-blue-800 underline font-medium'
+        >
+          sogunmusire@gmail.com
+        </a>
       </div>
 
       {/* Other Ways to Support */}

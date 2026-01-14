@@ -4,7 +4,7 @@ import axios from 'axios'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
-const API_BASE_URL = 'http://127.0.0.1:8080'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8080'
 
 function VideosPage() {
   const [videos, setVideos] = useState([])
